@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trace"
+version = "1.0.0"
+description = "Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter"
+requires-python = ">=3.8"
+authors = [{name = "Kowndinya Boyalakuntla"}, {name = "Ajinkya Pawar"}, {name = "Abdeslam Boularias"}, {name = "Jingjin Yu"}]
+
+[project.urls]
+Homepage = "https://kowndinya2000.github.io/trace-site/"
+Repository = "https://github.com/Kowndinya2000/trace-code"
+Dataset = "https://huggingface.co/datasets/Kowndi/trace"
+
+[tool.setuptools.packages.find]
+include = ["trace*"]

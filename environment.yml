@@ -1,0 +1,24 @@
+name: trace
+channels: [pytorch, nvidia, conda-forge]
+dependencies:
+  - python=3.8
+  - pip
+  - numpy=1.23
+  - scipy
+  - pyyaml
+  - pip:
+      - torch==1.13.1+cu117
+      - torchvision==0.14.1+cu117
+      - --extra-index-url https://download.pytorch.org/whl/cu117
+      - hydra-core==1.2.0
+      - omegaconf==2.2.3
+      - opencv-python==4.10.0.84
+      - rl-games==1.6.1
+      - pillow
+      - imageio
+      - imageio-ffmpeg
+      - tqdm
+      - matplotlib
+      # hardware only; harmless in a simulation-only install
+      - ur-rtde
+      - pyrealsense2

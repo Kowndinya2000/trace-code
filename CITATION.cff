@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "Please cite the TRACE paper when using this software or dataset."
+title: "TRACE: Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter"
+authors:
+  - family-names: Boyalakuntla
+    given-names: Kowndinya
+    affiliation: Rutgers University
+  - family-names: Pawar
+    given-names: Ajinkya
+    affiliation: Rutgers University
+  - family-names: Boularias
+    given-names: Abdeslam
+    affiliation: Rutgers University
+  - family-names: Yu
+    given-names: Jingjin
+    affiliation: Rutgers University
+repository-code: https://github.com/Kowndinya2000/trace-code
+url: https://kowndinya2000.github.io/trace-site/
+version: 1.0.0
+license: MIT

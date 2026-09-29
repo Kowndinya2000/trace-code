@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# downloaded payloads and run outputs
+data/
+runs/
+outputs/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.bag
+*.log
+*.jsonl
+**/recordings/
+**/previews/
+*.npz
+*.pth
+*.pt
+
+# local test symlinks (never committed)
+trace/sim/assets
+trace/sim/isaacgymenvs/logs_grasp

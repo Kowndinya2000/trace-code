@@ -1,0 +1,29 @@
+# Production teacher: graspability progress, step cost, terminal events.
+defaults:
+  - MoreTeacher
+  - _self_
+
+env:
+  episodeLength: 150
+  robust:
+    poseNoisePos: 0.012
+    poseNoiseYawDeg: 10.0
+  teacher:
+    arcAlignProb: 0.0
+    lambdaG: 2.0
+    lambdaC: 0.0
+    lambdaC3: 0.0
+    lambdaArc: 0.0
+    lambdaB: 0.0
+    lambdaEef: 0.0
+    lambdaDisturb: 0.0
+    lambdaStep: 0.1
+    rSuccess: 10.0
+    rOow: 12.0
+    rOutOfView: 11.0
+    gamma: 0.99
+
+# Inherit the existing teacher's controller, observations and randomization.
+# The inherited success branch replaces the step reward with rSuccess;
+# failure penalties subtract from progress minus the step cost. The first
+# post-reset step initializes the potential and receives no progress term.

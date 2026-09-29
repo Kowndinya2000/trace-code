@@ -1,0 +1,8 @@
+# Match the saved configuration of teacher-setsc-v3, including the entropy
+# override that differs from the current general-purpose teacher default.
+defaults:
+  - MoreTeacherSetSCPPO
+  - _self_
+params:
+  config:
+    entropy_coef: 0.02

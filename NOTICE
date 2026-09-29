@@ -1,0 +1,25 @@
+This repository includes and adapts third-party code and model weights:
+
+* Isaac Gym Preview 4 and the IsaacGymEnvs examples (NVIDIA). The task, configuration layout and
+  training loop follow their structure. Isaac Gym itself is not redistributed here; install it
+  from NVIDIA as described in docs/INSTALL.md.
+
+* The parallel Monte-Carlo tree-search baseline under trace/sim/pmbs_baseline derives from the
+  authors' published implementation of "Parallel Monte Carlo Tree Search with Batched Rigid-body
+  Simulations for Speeding up Long-Horizon Episodic Robot Planning" (Huang, Boularias and Yu,
+  IROS 2022) and retains its attribution. It is used unmodified as a baseline except for the
+  interfaces needed to score it on the scene sets used here.
+
+* The grasp-quality network (snapshot-post-020000.reinforcement.pth) and its EfficientNet
+  classifier (grasp_model-89.pth) are NOT trained in this work. They come from the same authors'
+  self-supervised grasping pipeline, "Interleaving Monte Carlo Tree Search and Self-Supervised
+  Learning for Object Retrieval in Clutter" (Huang, Guo, Boularias and Yu, ICRA 2022). The files
+  are also published in the authors' official PMBS release at https://github.com/arc-l/pmbs.
+  Please cite that work if you use these weights. Every method compared here -- ours, the
+  baselines and the privileged reference -- is scored by this same network, so it is a fixed part
+  of the evaluation protocol rather than a contribution of this work.
+
+* rl-games supplies the reinforcement-learning trainer used for the privileged teacher.
+
+Code written for this work is released under the license in LICENSE. The third-party components
+above keep their original terms.

@@ -1,0 +1,14 @@
+defaults:
+  - MoreOpenLoop
+
+name: MoreEvaluation
+
+# Dedicated first-attempt harness. The rollout code owns explicit resets and
+# records first-terminal outcomes using actual collision-mesh containment.
+env:
+  robust:
+    randomizeReset: False
+    sceneSymmetry: False
+    domainRand: False
+  videoLog:
+    enabled: False

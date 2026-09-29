@@ -1,0 +1,202 @@
+# used to create the object
+name: MoreOpenLoop
+
+physics_engine: ${..physics_engine}
+
+# if given, will override the device setting in gym. 
+env:
+  videoLog:
+    enabled: False      # twin: off by default. True -> wrap color cameras + periodic rollout mp4s to wandb
+    cameraRes: 320      # WIDE camera: full 55x45 workspace visible...
+    cameraFov: 0.036829 # ...at unchanged 2mm/px (GN A/B: mean dQ 0.04)
+    vizRes: 0           # >0 adds a SECOND, visualisation-only camera at this
+                        # resolution over the same 0.64 m (fov unchanged, so
+                        # 1280 -> 0.5 mm/px). Never seen by the policy or the
+                        # grasp network; tools/record_solve.py sets it.
+    numEnvs: 4          # tiled 2x2
+    windowSteps: 150
+    intervalSteps: 2500    # short runs reach ~10k steps total; 25000 fired once
+    firstStart: 500
+    fps: 20
+    outDir: "videos"
+  teacher:
+    lambdaG: 2.0        # graspability weight in Phi
+    lambdaC: 5.0        # min footprint-clearance weight (per m, clamped at cMax)
+    lambdaC3: 2.0       # mean gap to 3 nearest clutter (smooth unlock signal)
+    lambdaArc: 1.0      # largest free angular arc around target (seam detector)
+    arcRadius: 0.13     # clutter within this radius blocks the arc
+    lambdaB: 10.0       # boundary-risk weight
+    dSafe: 0.03         # boundary safety margin (m)
+    cMax: 0.20          # clearance clamp (m) so Phi stays bounded
+    lambdaStep: 0.10    # must exceed (1-gamma)*max|Phi| (asserted). Raised from
+                        # 0.08 because Phi_e lifts max|Phi| 7.75 -> 8.35.
+    lambdaEef: 3.0      # EEF working-zone pull-back (deadband, inside Phi)
+    eefWorkRadius: 0.15 # zero cost within this radius of the target
+    eefSpan: 0.20       # saturation distance of the pull-back
+    lambdaDisturb: 0.1  # clutter-displacement cost per metre
+    rSuccess: 10.0
+    rOow: 12.0          # MUST exceed the avoidable discounted step cost
+                        # (lambdaStep*(1-gamma^H)/(1-gamma) = 9.89), else
+                        # deliberately ejecting a block to end a hard episode
+                        # is worth ~+2.9 — the bulldozer incentive returning
+                        # through the terminal. Asserted at startup (T2b).
+    rOutOfView: 11.0    # same bound as rOow (was 2.0 -> bailing was worth ~+5.9)
+    gamma: 0.99         # keep equal to train gamma
+    arcAlignProb: 0.7
+    oowRule: corner      # corner (strict, default) | center (= paper eval metric)   # scene-symmetry picked so the free arc faces home
+  robust:
+    oowPenalty: -5.0
+    terminateOnOow: True
+    randomizeReset: False   # twin: reproduce the perceived scene exactly     # set False for eval_strict runs
+    sceneSymmetry: False    # twin: never transform the scene      # certifier sets False (replicas must share the scene)
+    noNoiseEnvStride: 0      # certifier: env idx %% stride == 0 -> nominal (no noise)
+    suppressResets: False    # certifier: record terminals without auto-reset
+    poseNoisePos: 0.003      # m, per-block reset noise (~perception error)
+    poseNoiseYawDeg: 2.0
+    wsSide: 0.448            # OOW box side (m) @ (0.5,0); 0.54 verified reachable on hardware
+    homePanNoiseDeg: 8.0     # shoulder-pan start randomization (height-safe)
+    entryAnchors: False   # random-entry starts from cfg/entry_poses.json anchors
+    entryClearance: 0.09  # min anchor-to-object-centre distance (m)
+    domainRand: False       # twin: nominal physics (perturb() does DR for the certifier)
+    frictionRange: [0.2, 0.5]
+    massScaleRange: [0.7, 1.4]
+    potentialShaping: True
+  # numEnvs: ${resolve_default:4096,${...num_envs}}
+  numEnvs: ${resolve_default:1,${...num_envs}}
+  numObservationsOverride: 94
+  numObservations: 50 # dummy value here as this is correctly updated in the code 
+  numActions: 16 # 16 # 4 # 16
+  numObjects: 11 # 11
+
+  # Physics substeps per RL step. MEASURED (job 248002, tools/measure_step_gap.py):
+  # delivery of the commanded 20mm primitive is 14.1% @1, 20.4% @2, 25.3% @3,
+  # 27.4% @4 — raising cfi does NOT fix the gap (the 10mm/tick clamp is not
+  # binding; incremental IK targets re-derived from the current pose each tick
+  # give an exponential approach that never converges). Keep 1 until the
+  # controller itself is fixed (controller.mode=absolute), so every run shares
+  # one MDP. See the method description (§3.11) A.
+  pushDistanceM: 0.04      # ADOPTED (Task B, 4-point sweep at 10.5 Mframes):
+                           # 2/3/4/6cm -> 78.6/84.0/85.0/81.4% strict success
+                           # with OOW 0/1/2/6 and median steps 38/24/18/11.
+                           # 4cm peaks on success, halves decisions vs 2cm, and
+                           # pays only a token share of the coarseness cost.
+                           # (was 0.02) # EEF displacement commanded per action (2 waypoint
+                           # phases). Delivery plateaus ~47% at 2cm regardless
+                           # of controller tuning (job 248067); PMBS uses 0.10.
+                           # Set controller.maxStepM: 0 to auto-scale the clamp.
+  controlFrequencyInv: 4   # >= 2*ticksPerPhase so a 2-phase plan finishes inside
+                           # one RL step (at 1 every second action was dropped:
+                           # measured 49.9%, cluster job 248055)
+  controller:
+    mode: absolute         # incremental (legacy) | absolute (hold setpoint per phase)
+                           # | reach_gated (hold + advance only when joints arrive, PMBS-style)
+    holdOrientation: True  # drive the tool back to its reference orientation
+                           # (legacy orn_err=0 left tilt free: 0.90 -> 0.09 deg mean)
+    maxStepM: 0.02         # per-frame Cartesian clamp; 0 = auto (= pushDistanceM/2)
+    ticksPerPhase: 2       # physics frames per waypoint phase (K). 1 = legacy;
+                           # hold modes need >= 2 (a phase must span frames) and
+                           # controlFrequencyInv >= 2*K so a plan fits one RL step
+    reachTolRad: 0.012     # reach_gated: max per-joint error counted as arrived
+    stallFrames: 100       # reach_gated: frames without motion before giving up
+    stallEpsRad: 0.001     # reach_gated: per-joint motion below this = stalled
+  openLoop:
+    replayTol: 0.002        # m: "waypoint reached" during policy-out-of-the-loop replay
+    replayMaxTicks: 60      # per-waypoint tick budget (anti-stall)
+
+  envSpacing: 1.5
+  episodeLength: 450
+  enableDebugVis: False
+
+  clipObservations: 5.0
+  clipActions: 1.0
+
+  startPositionNoise: 0.0
+  startRotationNoise: 0.0
+
+  numProps: 16
+  aggregateMode: 3
+
+  geometry:
+    numSubRects: 8
+    # gripperOpenWidth: 0.085 # 8.5 cms (along Simulation Y axis) 
+    # gripperOpenLength: 0.022 # 2.2 cms (along Simulation X axis)
+
+    gripperOpenWidth: 0.022 # 8.5 cms (along Simulation Y axis) 
+    gripperOpenLength: 0.085 # 2.2 cms (along Simulation X axis)
+
+  overlapScale:  -1.0 # -3.0, -30.0
+  distanceScale: -5.0 # -2500 # -25000.0
+  targetClearanceReward: 3.0 # 200.0
+  desiredGripperToTargetDist: 0.13 # 0.09 # 0.15 # 0.15 (six-obj), 0.17 (twelve-obj)
+  gripperToBlockThreshold: 0.15
+  tightCouplingScale: 0.0 # -800.0
+  tightCouplingBias: 0.0 # -1.0
+  tightCouplingRewardScale: 10.0
+  gripperIdleScale: -0.5 # -25.0, -100.0, -10.0
+  avgCouplingDifference: 0.06 # 0.04 -4 cms
+  minCouplingDifference: 0.03
+  nonZeroDistBias: -200.0
+
+  asset:
+    assetRoot: "../../assets"
+    assetFileNameUr5e: "urdf/more/ur5e_simplified/ur5e_simplified_gripper.urdf"
+    assetFolderNameBlocks: "urdf/more/blocks-more"
+  
+  test_cases:
+    scene_root_dir: "test-cases"          # perceive_scene.py writes test-cases/real2sim
+    difficulty_choice: "real2sim"   # or a gen-v2 split when batching a suite
+    sceneOffset: 0                  # env i loads scene (sceneOffset + i). Scenes bind
+                                    # to envs once at construction, so this is the only
+                                    # way to reach scenes beyond the first num_envs.
+
+  visualization:
+    root_dir: "vis_output"  
+    dir_name: "record-random"
+  # set to True if you use camera sensors in the environment
+  enableCameraSensors: True
+
+sim:
+  dt: 0.0166 # 1/60
+  substeps: 2
+  up_axis: "z"
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  gravity: [0.0, 0.0, -9.81]
+  physx:
+    num_threads: ${....num_threads}
+    solver_type: ${....solver_type}
+    use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
+    num_position_iterations: 24 # 12
+    num_velocity_iterations: 1
+    contact_offset: 0.005
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 5.0  # 1000 turned tiny overlaps into fly-aways
+    default_buffer_size_multiplier: 5.0
+    max_gpu_contact_pairs: 8388608 # 8*1024*1024. 1M killed PhysX GPU narrowphase
+                                   # (PxgNarrowphaseCore err 700) as soon as the twin
+                                   # ran batched (64+ envs) instead of 1-16.
+    num_subscenes: ${....num_subscenes}
+    contact_collection: 0 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (broken - do not use!)
+
+robot:
+  # default_joint_angles: [-0.662, -2.312, 1.822, -1.543, -1.228, 2.562, 0, 0] 
+  # default_joint_angles: [-33.50, -113.61, 151.06, -127.36, -89.75, 326.49, 0.0, 0.0]
+  # default_joint_angles: [-23.77, -94.08, 137.80, -133.22, -89.56, 335.67, 0, 0] # just forward
+  # default_joint_angles: [-16.33, -93.77, 137.80, -135, -90, 160, 0, 0] # forward + exact gripper orientation
+  # default_joint_angles: [-16.22, -91.98, 139.30, -137.22, -90, 161.29, 0, 0] # forward + exact gripper orientation (EoH Robot URDF)
+  # default_joint_angles: [-16.22, -91.98, 139.30, -137.22, -90, 161.29, 45.85, -45.85, 45.85, 45.85, 45.85, -45.85] # Ideal for six-obj setup. forward + exact gripper orientation (non EoH URDF)
+  # default_joint_angles: [-17.25, -96, 143.24, -136.18, -89.87, 160.08, 0, 0] # # Ideal for ten-obj setup. # forward + exact gripper orientation (EoH Robot URDF)
+  
+  # Changing home robot pose on Nov 3, 2025
+  default_joint_angles: [-19.32, -100.29, 147.48, -137.18, -89.72, 160.73, 0, 0] # # Ideal for twelve-obj setup. # forward + exact gripper orientation (EoH Robot URDF)
+  # default_joint_angles: [-16.04, -114.66, 117.57, -92.90, -89.78, -196.15, 0, 0] # # Ideal for twelve-obj setup. # forward + exact gripper orientation (EoH Robot URDF)
+  
+  # 20000/400 measured +17 points of per-plan delivery at zero wall-clock
+  # cost (job 248067); joint velocity 6.48 stays under the 6.86 baseline.
+  stiffness: [20000, 20000, 20000, 20000, 20000, 20000, 1e6, 1e6, 1e6, 1e6, 1e6, 1e6]
+  damping: [400, 400, 400, 400, 400, 400, 400, 80, 80, 80, 80, 80, 80]
+
+  start_pose_p: [0.0, 0.0, -0.03]
+  start_pose_r: [0.0, 0.0, 0.0, 1.0] # quaternion
+task:
+  randomize: False
