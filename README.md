@@ -1,21 +1,21 @@
 # Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter
 
-**TRACE** — *Teacher Rollouts for Adaptive Closed-loop Execution* — is the method introduced in that paper.
 **Kowndinya Boyalakuntla<sup>1</sup>, Ajinkya Pawar<sup>2</sup>, Abdeslam Boularias<sup>1</sup>, Jingjin Yu<sup>1</sup>**<br>
 <sup>1</sup> Rutgers University<br>
 <sup>2</sup> Indian Institute of Technology Bombay
 
-This repository is the reference implementation, with the data and evaluation protocol.
-Project page, with video walkthroughs of the method and the hardware trials:
-**https://trace-retrieval.github.io/**
+[Project page](https://trace-retrieval.github.io/) · [Paper](https://trace-retrieval.github.io/static/paper/trace.pdf) · [Dataset](https://huggingface.co/datasets/Kowndi/trace)
 
-Retrieving a target object from dense clutter with non-prehensile pushes, then grasping it.
+We introduce **TRACE** (*Teacher Rollouts for Adaptive Closed-loop Execution*), a
+plan-conditioned imitation learning framework for object retrieval under self-occlusion
+in dense clutter. TRACE uses non-prehensile pushes to expose a target object for grasping.
 A privileged teacher solves the scene once inside a digital twin built from a single RGB-D
 view; a student then executes on the real robot from partial observations, conditioned on
 that nominal plan and free to deviate from it.
 
-This repository contains the full method, the baselines it is compared against, and scripts
-that reproduce the simulation tables of the paper end to end.
+This repository provides our reference implementation, comparison baselines, hardware
+pipeline, and scripts for reproducing the simulation results in our paper. The project
+page includes method walkthroughs and videos of our hardware trials.
 
 ```
 trace/sim/         task, policies, digital twin, evaluation protocol, baselines
@@ -70,7 +70,7 @@ its nominal travel plus 15 cm. Exhausting either is a failure, not a reset.
 | Planning and heuristic baselines | `python scripts/reproduce_sim.py baselines` | ~6 GPU-hours |
 | Plan-window and recurrent-memory ablations | `python scripts/reproduce_sim.py ablations` | ~1 GPU-hour |
 
-All of them evaluate the same 511 development scenes, with arm occlusion from the robot's own
+These evaluations use the same 511 development scenes, with arm occlusion from the robot's own
 links, 10% detection dropout, a five-step observation blackout, and the teacher-relative budget.
 Confidence intervals are tier-stratified scene bootstraps over 2,000 resamples.
 See [docs/REPRODUCTION.md](docs/REPRODUCTION.md) for the expected numbers and per-table runtimes.
@@ -83,13 +83,12 @@ recordings. [docs/HARDWARE.md](docs/HARDWARE.md) covers the bill of materials, t
 calibration board and procedure, the workspace geometry, how to launch each controller, and how
 the annotated review videos are produced.
 
-Nothing in this repository requires a robot: the full evaluation, including every baseline and
-ablation, runs in simulation.
+The simulation evaluations, including the baselines and ablations, do not require a robot.
 
 ## Layout and configuration
 
-No path is hard-coded. `trace/common/paths.py` resolves everything from the repository root and
-these variables:
+`trace/common/paths.py` configures paths using the repository root and these environment
+variables:
 
 | Variable | Meaning | Default |
 |---|---|---|
