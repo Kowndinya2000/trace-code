@@ -107,10 +107,5 @@ parallel-search baseline derives from the authors' published implementation, ret
 ## Citation
 
 ```bibtex
-@misc{boyalakuntla2026trace,
-  title = {Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter},
-  author = {Boyalakuntla, Kowndinya and Pawar, Ajinkya and Boularias, Abdeslam and Yu, Jingjin},
-  year = {2026},
-  url = {https://trace-retrieval.github.io/}
-}
+
 ```
