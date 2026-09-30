@@ -1,12 +1,13 @@
 # Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter
 
 **TRACE** — *Teacher Rollouts for Adaptive Closed-loop Execution* — is the method introduced in that paper.
-**Kowndinya Boyalakuntla, Ajinkya Pawar, Abdeslam Boularias, Jingjin Yu**  
-Rutgers University
+**Kowndinya Boyalakuntla<sup>1</sup>, Ajinkya Pawar<sup>2</sup>, Abdeslam Boularias<sup>1</sup>, Jingjin Yu<sup>1</sup>**<br>
+<sup>1</sup> Rutgers University<br>
+<sup>2</sup> Indian Institute of Technology Bombay
 
 This repository is the reference implementation, with the data and evaluation protocol.
 Project page, with video walkthroughs of the method and the hardware trials:
-**https://kowndinya2000.github.io/trace-site/**
+**https://trace-retrieval.github.io/**
 
 Retrieving a target object from dense clutter with non-prehensile pushes, then grasping it.
 A privileged teacher solves the scene once inside a digital twin built from a single RGB-D
@@ -111,6 +112,6 @@ parallel-search baseline derives from the authors' published implementation, ret
   title = {Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter},
   author = {Boyalakuntla, Kowndinya and Pawar, Ajinkya and Boularias, Abdeslam and Yu, Jingjin},
   year = {2026},
-  url = {https://kowndinya2000.github.io/trace-site/}
+  url = {https://trace-retrieval.github.io/}
 }
 ```
