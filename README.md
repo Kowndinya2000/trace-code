@@ -4,7 +4,7 @@
 <sup>1</sup> Rutgers University<br>
 <sup>2</sup> Indian Institute of Technology Bombay
 
-[Project page](https://trace-retrieval.github.io/) · [Paper](https://trace-retrieval.github.io/static/paper/trace.pdf) · [Dataset](https://huggingface.co/datasets/Kowndi/trace)
+[Project page](https://trace-retrieval.github.io/) · [Paper](https://arxiv.org/abs/2609.38857) · [Dataset](https://huggingface.co/datasets/Kowndi/trace)
 
 We introduce **TRACE** (*Teacher Rollouts for Adaptive Closed-loop Execution*), a
 plan-conditioned imitation learning framework for object retrieval under self-occlusion
@@ -107,5 +107,13 @@ parallel-search baseline derives from the authors' published implementation, ret
 ## Citation
 
 ```bibtex
-
+@misc{boyalakuntla2026trace,
+  title         = {Plan-Conditioned Imitation for Robust Object Retrieval under Self-Occlusion in Dense Clutter},
+  author        = {Kowndinya Boyalakuntla and Ajinkya Pawar and Abdeslam Boularias and Jingjin Yu},
+  year          = {2026},
+  eprint        = {2609.38857},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO},
+  url           = {https://arxiv.org/abs/2609.38857}
+}
 ```
